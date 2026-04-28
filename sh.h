@@ -568,6 +568,7 @@ EXTERN int    justpr IZERO;	/* Just print because of :p hist mod */
 EXTERN int    loginsh IZERO;	/* We are a loginsh -> .login/.logout */
 EXTERN int    neednote IZERO;	/* Need to pnotify() */
 EXTERN int    noexec IZERO;	/* Don't execute, just syntax check */
+EXTERN int    ast_dump IZERO;	/* --ast-dump: emit JSON AST, don't execute */
 EXTERN int    pjobs IZERO;	/* want to print jobs if interrupted */
 EXTERN int    setintr IZERO;	/* Set interrupts on/off -> Wait intr... */
 EXTERN int    handle_interrupt IZERO;/* Are we currently handling an interrupt? */

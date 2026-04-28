@@ -896,6 +896,15 @@ main(int argc, char **argv)
 	xprintf("%s", CGETS(11, 8, HELP_STRING));
 	xexit(0);
     }
+    if (argc > 1 && strcmp(argv[1], "--ast-dump") == 0) {
+	ast_dump = 1;
+	fast = 1;	/* skip rc files */
+	prompt = 0;
+	noexec = 1;	/* safety: never execute */
+	/* remove --ast-dump so file arg is handled normally */
+	memmove(&argv[1], &argv[2], (size_t)(argc - 1) * sizeof(*argv));
+	argc--;
+    }
     /*
      * Process the arguments.
      *
@@ -1992,9 +2001,12 @@ process(int catch)
     /* PWP: This might get nuked by longjmp so don't make it a register var */
     size_t omark;
     volatile int didexitset = 0;
+    int ast_stmt_num = 0;
 
     getexit(osetexit);
     omark = cleanup_push_mark();
+    if (ast_dump)
+	dprintf(SHOUT, "{\"type\":\"program\",\"body\":[");
     for (;;) {
 	struct command *t;
 	int hadhist, old_pintr_disabled;
@@ -2156,6 +2168,17 @@ process(int catch)
 	    stderror(ERR_OLD);
 	}
 
+	if (ast_dump) {
+	    if (t != NULL) {
+		if (ast_stmt_num > 0) write(SHOUT, ",", 1);
+		write(SHOUT, "\n", 1);
+		dump_ast_json(t);
+		ast_stmt_num++;
+	    }
+	    freesyn(t);
+	    goto cmd_done;
+	}
+
 	postcmd();
 	/*
 	 * Execute the parse tree From: Michael Schroeder
@@ -2179,6 +2202,8 @@ process(int catch)
 	else
 	    haderr = 1;
     }
+    if (ast_dump)
+	dprintf(SHOUT, "\n]}\n");
     cleanup_pop_mark(omark);
     resexit(osetexit);
     exitset--;
@@ -2451,6 +2476,8 @@ xexit(int i)
 	    while ((np = np->p_friends) != pp);
 	}
     }
+    if (ast_dump)
+	dprintf(SHOUT, "\n]}\n");
     untty();
 #ifdef NLS_CATALOGS
     /*

@@ -303,6 +303,11 @@ extern	int		  xtcsetattr	(int, int, const struct termios *);
 extern	ssize_t		  xwrite	(int, const void *, size_t);
 
 /*
+ * sh.ast.c
+ */
+extern	void		  dump_ast_json	(const struct command *);
+
+/*
  * sh.parse.c
  */
 extern	void		  alias		(struct wordent *);
